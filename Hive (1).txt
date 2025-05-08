@@ -1,0 +1,132 @@
+﻿start-dfs.sh
+start-yarn.sh
+🔹 Step 1: Start Hive Shell
+Open your terminal and type:
+bash
+CopyEdit
+hive
+
+
+________________
+
+
+🔹 Step 2: Create the Database
+sql
+CopyEdit
+CREATE DATABASE IF NOT EXISTS flight_db;
+USE flight_db;
+
+
+________________
+
+
+🔹 Step 3: Create the Tables
+🛫 Airlines Table
+sql
+CopyEdit
+CREATE TABLE IF NOT EXISTS airlines (
+    airline_id INT,
+    name STRING,
+    country STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+🛬 Airports Table
+sql
+CopyEdit
+CREATE TABLE IF NOT EXISTS airports (
+    airport_id INT,
+    name STRING,
+    city STRING,
+    country STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+🛩 Flights Table
+sql
+CopyEdit
+CREATE TABLE IF NOT EXISTS flights (
+    flight_id INT,
+    airline_id INT,
+    origin_airport_id INT,
+    dest_airport_id INT,
+    departure_time STRING,
+    arrival_time STRING,
+    duration INT,
+    status STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+________________
+
+
+🔹 Step 4: Load Data into Tables
+Prepare CSV files like airlines.csv, airports.csv, and flights.csv in HDFS or local path and then run:
+sql
+CopyEdit
+LOAD DATA LOCAL INPATH '/home/user/airlines.csv' INTO TABLE airlines;
+LOAD DATA LOCAL INPATH '/home/user/airports.csv' INTO TABLE airports;
+LOAD DATA LOCAL INPATH '/home/user/flights.csv' INTO TABLE flights;
+
+
+________________
+
+
+🔹 Step 5: Sample Queries
+1. View all flights
+sql
+CopyEdit
+SELECT * FROM flights;
+
+
+2. Find delayed flights
+sql
+CopyEdit
+SELECT * FROM flights WHERE status = 'Delayed';
+
+
+3. Join flights with airlines
+sql
+CopyEdit
+SELECT f.flight_id, a.name AS airline_name, f.status
+FROM flights f
+JOIN airlines a ON f.airline_id = a.airline_id;
+
+
+4. Flights between two airports
+sql
+CopyEdit
+SELECT f.flight_id, f.departure_time, f.arrival_time
+FROM flights f
+WHERE f.origin_airport_id = 101 AND f.dest_airport_id = 202;
+
+
+________________
+
+
+🔹 Step 6: Optional - Create External or Partitioned Tables
+For large-scale systems, consider partitioning by status or airline_id for performance.
+sql
+CopyEdit
+CREATE TABLE flights_partitioned (
+    flight_id INT,
+    airline_id INT,
+    origin_airport_id INT,
+    dest_airport_id INT,
+    departure_time STRING,
+    arrival_time STRING,
+    duration INT
+)
+PARTITIONED BY (status STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
